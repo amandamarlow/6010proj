@@ -5,6 +5,7 @@ clear
 clc
 close all
 addpath("C:\Users\marlo\MATLAB Drive\6010\RigidBodyKinematics-Matlab\Matlab")
+addpath("functions\")
 
 % given
 Is_B = diag([86, 85, 113]); % kgm^2
@@ -41,7 +42,7 @@ sigBN_t0 = [0.1; 0.2; 0.3];
 omegaBN_B_t0 = [0.01; -0.01; 0.005]; % [rad/s]
 % Call Integrator
 gamma_tf = [-45, 45, -45, 45]'*pi/180; % rad
-tf = 300; % s
+tf = 58; % s
 
 X0 = [sigBN_t0; omegaBN_B_t0; gamma_t0'; d_gamma_t0'; OMEGA_t0'];
 

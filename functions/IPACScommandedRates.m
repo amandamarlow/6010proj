@@ -3,7 +3,7 @@ function [d_eta] = IPACScommandedRates(t,X, Lr_B, N, Iws, J_G, Gs_B, Gt_B, Gg_B,
     w1 = 1*10^-4;
     w2 = 1;
 %     P = 680; % Required Power
-    P = 10; 
+    P = 10*sin(t); 
     
 %     Lrp = [-Lr_B; P];
     Lrp = [P; -Lr_B];
