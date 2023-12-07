@@ -73,7 +73,7 @@ function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, torques, s
         % calculate required torque and attitude error
         [Lr_B, sigRN, omegaRN_B, sigBR, omegaBR_B] = requiredTorque(time(n), X, N, I_B, Iws, Gs_B, Gt_B, Gg_B, K, P);
         % outer loop servo rate commands
-        [d_eta] = commandedRates(time(n), X, Lr_B, N, Iws, J_G, Gs_B, Gt_B, Gg_B, gamma_tf, ke);
+        [d_eta] = IPACScommandedRates(time(n), X, Lr_B, N, Iws, J_G, Gs_B, Gt_B, Gg_B, gamma_tf, ke);
         
         d_gamma_desired = d_eta(N+1:end);
         d_OMEGA_desired = d_eta(1:N);

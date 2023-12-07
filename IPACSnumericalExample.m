@@ -52,7 +52,7 @@ X0 = [sigBN_t0; omegaBN_B_t0; gamma_t0; d_gamma_t0; OMEGA_t0];
 % Call Integrator
 gamma_tf = [-45, 45, -45, 45]'*pi/180; % rad
 tf = 300; % s
-[time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, torques, servoTracking] = integrator(X0, N, 0, tf, gamma_tf, Gs_B_t0, Gt_B_t0, Gg_B_t0, Is_B);
+[time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, torques, servoTracking] = IPACSintegrator(X0, N, 0, tf, gamma_tf, Gs_B_t0, Gt_B_t0, Gg_B_t0, Is_B);
 
 % Plot
 plotAllVSCMG(time, N, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, torques, servoTracking)
