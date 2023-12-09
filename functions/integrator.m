@@ -1,21 +1,13 @@
-function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, torques, servoTracking] = integrator(X0, N, t0, tmax, gamma_tf, Gs_B_t0, Gt_B_t0, Gg_B, Is_B)
-    
-    % set all gains
-    K = 5;
-    P = 15;
-    K_gamma = 10;
-    ke = 10;
-    
-    sigRN = X0(1:3);
-    omegaRN_B = zeros(3,1);
-
+function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTracking, torques] = integrator(X0, N, t0, tmax, Gs_B_t0, Gt_B_t0, Gg_B)
     % Constant inertias
+    Is_B = diag([86, 85, 113]); % kgm^2
     J_G = diag([0.13, 0.04, 0.03]); % kgm^2 IG + Iw
     Iws = 0.1; % kgm^2
     
     Js = J_G(1,1);
     Jt = J_G(2,2);
     Jg = J_G(3,3);
+%     IGs = Js - Iws;
     
     % Set initial conditions and preallocate vectors
     delta_t = 0.01; %[s]
@@ -27,8 +19,8 @@ function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, torques, s
     commandedRates_vec = zeros(N*2,length(time));
     H_Nvec = zeros(3,length(time));
     Tvec = zeros(1,length(time));
-    torques = zeros(2*N+3,length(time));
     servoTracking = zeros(4*N,length(time));
+    torques = zeros(2*N+3, length(time));
     
     gamma_t0 = X0(7:6+N);
     
@@ -45,8 +37,7 @@ function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, torques, s
     
     X = X0;
     for n = 1:length(time)-1
-        
-        % extract current state
+
         sigBN = X(1:3);
         omegaBN_B = X(4:6);
         gamma = X(7:6+N);
@@ -69,17 +60,15 @@ function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, torques, s
            
         end
         I_B = Is_B + J_B_sum;
-        
-        % calculate required torque and attitude error
-        [Lr_B, sigRN, omegaRN_B, sigBR, omegaBR_B] = requiredTorque(sigRN, X, N, I_B, Iws, Gs_B, Gt_B, Gg_B, K, P);
-        % outer loop servo rate commands
-        [d_eta] = commandedRates(X, Lr_B, N, Iws, J_G, Gs_B, Gt_B, Gg_B, gamma_tf, ke);
-        
-        d_gamma_desired = d_eta(N+1:end);
-        d_OMEGA_desired = d_eta(1:N);
-        d2_gamma_desired = (d_gamma_desired - commandedRates_vec(1:N,n))/delta_t;
-        
+
+        [Lr_B, sigRN, omegaRN_B, sigBR, omegaBR_B] = requiredTorque(time(n), X, N, I_B, Iws, Gs_B, Gt_B, Gg_B);
+
+        [d_OMEGA_desired, d_gamma_desired] = commandedRates(time(n), X, Lr_B, N, Iws, J_G, Gs_B, Gt_B, Gg_B);
+
         % Calculate control torques
+        K_gamma = 10;
+        
+        d2_gamma_desired = (d_gamma_desired - commandedRates_vec(1:N,n))/delta_t;
         delta_d_gamma = d_gamma - d_gamma_desired;
         d2_gamma = d2_gamma_desired - K_gamma*delta_d_gamma;
         
@@ -88,12 +77,9 @@ function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, torques, s
         ug = zeros(N,1);
         us = zeros(N,1);
         for i = 1:N
-
             omegas = Gs_B(:,i)'*omegaBN_B;
             omegat = Gt_B(:,i)'*omegaBN_B;
-%             omegag = gg_B'*omegaBN_B;
             
-            % PROBLEM
             ug(i) = Jg*(d2_gamma(i)) - (Js - Jt)*omegas*omegat - Iws*OMEGA(i)*omegat;
             us(i) = Iws*(d_OMEGA_desired(i) + d_gamma(i)*omegat);
         end
@@ -125,12 +111,17 @@ function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, torques, s
         RNvec(:,n) = [sigRN; omegaRN_B];
         BRvec(:,n) = [sigBR; omegaBR_B];
         commandedRates_vec(:,n+1) = [d_gamma_desired; d_OMEGA_desired];
-        torques(:,n+1) = [us; ug; Lr_B];
+        torques(:,n) = [us; ug; Lr_B];
 
     end
     
+    sigBN = X(1:3);
+%     omegaBN_B = X(4:6);
+    [sigRN, omegaRN_R] = missionTracking(time(n+1));
+    BN = MRP2C(sigBN);
+    RN = MRP2C(sigRN);
+    BR = BN*RN';
+    omegaRN_B = BR*omegaRN_R;
     RNvec(:,n+1) = [sigRN; omegaRN_B];
-    BRvec(:,n) = [sigBR; omegaBR_B];
 
 end
-
