@@ -5,24 +5,26 @@ function [d_eta] = commandedRates(t,X, Lr_B, N, Iws, J_G, Gs_B, Gt_B, Gg_B, gamm
     d_gamma = X(7+N:6+2*N);
     OMEGA = X(7+2*N:6+3*N);
 
-    % get reference state omega RN_B
-    [sigRN, omegaRN_R] = RefState(t);
-    dt_omegaRN = 0.0001;
-    [sigRN_t2, omegaRN_R_t2] = RefState(t + dt_omegaRN);
-
-    BN = MRP2C(sigBN);
-    RN = MRP2C(sigRN);
-    BR = BN*RN';
-
-    RN2 = MRP2C(sigRN_t2);
-    BR2 = BN*RN2';
-    omegaRN_B_t2 = BR2*omegaRN_R_t2;
-
-    sigBR = C2MRP(BR);
-
-    omegaRN_B = BR*omegaRN_R;
-    omegaBR_B = omegaBN_B - omegaRN_B;
-    dN_omegaRN_B = (omegaRN_B_t2 - omegaRN_B) / dt_omegaRN;
+%     % get reference state omega RN_B
+%     [sigRN, omegaRN_R] = RefState(t);
+%     dt_omegaRN = 0.0001;
+%     [sigRN_t2, omegaRN_R_t2] = RefState(t + dt_omegaRN);
+% 
+%     BN = MRP2C(sigBN);
+%     RN = MRP2C(sigRN);
+%     BR = BN*RN';
+% 
+%     RN2 = MRP2C(sigRN_t2);
+%     BR2 = BN*RN2';
+%     omegaRN_B_t2 = BR2*omegaRN_R_t2;
+% 
+%     sigBR = C2MRP(BR);
+% 
+%     omegaRN_B = BR*omegaRN_R;
+%     omegaBR_B = omegaBN_B - omegaRN_B;
+%     dN_omegaRN_B = (omegaRN_B_t2 - omegaRN_B) / dt_omegaRN;
+    
+    omegaRN_B = zeros(3,1);
     
     % other stuff
     Js = J_G(1,1);

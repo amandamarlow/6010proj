@@ -24,6 +24,10 @@ function [Lr_B, sigRN, omegaRN_B, sigBR, omegaBR_B] = requiredTorque(t, X, N, I_
     omegaBR_B = omegaBN_B - omegaRN_B;
     dN_omegaRN_B = (omegaRN_B_t2 - omegaRN_B) / dt_omegaRN;
     
+%     omegaRN_B = zeros(3,1);
+%     dN_omegaRN_B = zeros(3,1);
+%     omegaBR_B = omegaBN_B - omegaRN_B;
+    
     Lr_B = -K*sigBR - P*omegaBR_B + I_B*(dN_omegaRN_B - tilde(omegaBN_B)*omegaRN_B)...
         + tilde(omegaBN_B)*I_B*omegaBN_B;
     for i = 1:N
