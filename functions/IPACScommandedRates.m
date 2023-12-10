@@ -58,15 +58,15 @@ function [d_eta] = IPACScommandedRates(t,X, Lr_B, N, Iws, J_G, Gs_B, Gt_B, Gg_B,
     D = D1 - D2 + D3 + D4;
     D0 = Gs_B*Iws;
     
-    if rank([D0, D]) < 3
-        disp(rank([D0, D]))
-    end
-    if rank(D) < 3
-        disp(rank(D))
-    end
-    if rank(D0) < 3
-        disp(rank(D0))
-    end
+%     if rank([D0, D]) < 3
+%         disp(rank([D0, D]))
+%     end
+%     if rank(D) < 3
+%         disp(rank(D))
+%     end
+%     if rank(D0) < 3
+%         disp(rank(D0))
+%     end
 
     % Get desired rates
     mu = 10^(-9);

@@ -1,4 +1,4 @@
-function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, torques, servoTracking] = integrator(X0, N, t0, tmax, gamma_tf, Gs_B_t0, Gt_B_t0, Gg_B, Is_B)
+function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, torques, servoTracking] = IPACSintegrator(X0, N, t0, tmax, gamma_tf, Gs_B_t0, Gt_B_t0, Gg_B, Is_B)
     
     % set all gains
     K = 5;
