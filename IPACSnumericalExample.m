@@ -55,8 +55,16 @@ X0 = [sigBN_t0; omegaBN_B_t0; gamma_t0; d_gamma_t0; OMEGA_t0];
 
 % Call Integrator
 gamma_tf = [-45, 45, -45, 45]'*pi/180; % rad
-tf = 150; % s
+tf = 1000; % s
 [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTracking, torques] = integrator(X0, N, 0, tf, Gs_B_t0, Gt_B_t0, Gg_B_t0);
+
+% % test orbit
+% t = linspace(0,2*pi/(14.577788549/24/60^2*2*pi));
+% rc_N = zeros(3,length(t));
+% for i = 1:length(t)
+%     [rc_N(:,i), ~] = orbitPropogator(t(i));
+% end
+% plotOrbit(rc_N, "testing orbit")
 
 % Plot
 plotAllVSCMG(time, N, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, torques, servoTracking)

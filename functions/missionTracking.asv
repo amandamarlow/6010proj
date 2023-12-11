@@ -8,14 +8,14 @@ function [sigRN, omegaRN_R] = missionTracking(t)
     [rc_N, vc_N] = orbitPropogator(t);
     
     ls_N = rs_N - rc_N;
-    ls = norm(ls_N);
+    ls = norm(ls);
     lt_N = rt_N - rc_N;
-    lt = norm(lt_N);
+    lt = norm(lt);
     
     d_ls_N = vs_N - vc_N;
     d_lt_N = vt_N - vc_N;
     
-    % want z axis alligned with lt and y axis perpendicular to ls
+    % want z axis alligned with lt
     
     z_N = lt_N/lt;
     y_N = cross(z_N,ls_N)/norm(cross(z_N,ls_N));
@@ -25,11 +25,8 @@ function [sigRN, omegaRN_R] = missionTracking(t)
     sigRN = C2MRP(RN);
     
     omegaX = -dot(d_lt_N, y_N)/lt;
-    omegaY = dot(d_lt_N, x_N)/lt;
-    omegaZ = (dot(omegaX*ls_N,z_N) + dot(y_N, d_ls_N)) / dot(ls_N, x_N);
     
-    omegaRN_N = [omegaX; omegaY; omegaZ];
-    omegaRN_R = RN*omegaRN_N;
+    omegaRN_R
     
 end
 
