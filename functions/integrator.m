@@ -3,13 +3,13 @@ function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTrack
 %     Is_B = diag([86, 85, 113]); % kgm^2
 %     J_G = diag([0.13, 0.04, 0.03]); % kgm^2 IG + Iw
 %     Iws = 0.1; % kgm^2
-    Is_B = inertia.Is_B; % kgm^2
-    J_G = inertia.J_G; % kgm^2 IG + Iw
-    Iws = inertia.Iws; % kgm^2
+%     Is_B = inertia.Is_B; % kgm^2
+%     J_G = inertia.J_G; % kgm^2 IG + Iw
+%     Iws = inertia.Iws; % kgm^2
     
-    Js = J_G(1,1);
-    Jt = J_G(2,2);
-    Jg = J_G(3,3);
+    Js = inertia.J_G(1,1);
+    Jt = inertia.J_G(2,2);
+    Jg = inertia.J_G(3,3);
 %     IGs = Js - Iws;
     
     % Set initial conditions and preallocate vectors
@@ -28,7 +28,7 @@ function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTrack
     gamma_t0 = X0(7:6+N);
     
     % calculate angular momentumand rotational kinetic energy of initial state
-    [H_N_t0, T_t0] = getMomentumEnergy(X0, N, Is_B, J_G, Iws, Gs_B_t0, Gt_B_t0, Gg_B, gamma_t0);
+    [H_N_t0, T_t0] = getMomentumEnergy(X0, N, inertia.Is_B, inertia.J_G, inertia.Iws, Gs_B_t0, Gt_B_t0, Gg_B, gamma_t0);
     
     % Include initial conditions in output vectors
     Xvec(:,1) = X0;
@@ -62,11 +62,11 @@ function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTrack
             J_B_sum = J_B_sum + Js*(gs_B*gs_B') + Jt*(gt_B*gt_B') + Jg*(gg_B*gg_B');
            
         end
-        I_B = Is_B + J_B_sum;
+        I_B = inertia.Is_B + J_B_sum;
 
-        [Lr_B, sigRN, omegaRN_B, sigBR, omegaBR_B] = requiredTorque(time(n), X, N, I_B, Iws, Gs_B, Gt_B, Gg_B, gains);
+        [Lr_B, sigRN, omegaRN_B, sigBR, omegaBR_B] = requiredTorque(time(n), X, N, I_B, inertia.Iws, Gs_B, Gt_B, Gg_B, gains);
 
-        [d_OMEGA_desired, d_gamma_desired] = commandedRates(time(n), X, Lr_B, N, Iws, J_G, Gs_B, Gt_B, Gg_B, gains);
+        [d_OMEGA_desired, d_gamma_desired] = commandedRates(time(n), X, Lr_B, N, inertia.Iws, inertia.J_G, Gs_B, Gt_B, Gg_B, gains);
 
         % Calculate control torques
 %         K_gamma = 10;
@@ -84,16 +84,16 @@ function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTrack
             omegas = Gs_B(:,i)'*omegaBN_B;
             omegat = Gt_B(:,i)'*omegaBN_B;
             
-            ug(i) = Jg*(d2_gamma(i)) - (Js - Jt)*omegas*omegat - Iws*OMEGA(i)*omegat;
-            us(i) = Iws*(d_OMEGA_desired(i) + d_gamma(i)*omegat);
+            ug(i) = Jg*(d2_gamma(i)) - (Js - Jt)*omegas*omegat - inertia.Iws*OMEGA(i)*omegat;
+            us(i) = inertia.Iws*(d_OMEGA_desired(i) + d_gamma(i)*omegat);
         end
         u = [ug; us];
         
         %RK4
-        k1 = delta_t.*Xdot(X, u, L_B, N, Gs_B_t0, Gt_B_t0, Gg_B, gamma_t0);
-        k2 = delta_t.*Xdot(X + k1/2, u, L_B, N, Gs_B_t0, Gt_B_t0, Gg_B, gamma_t0);
-        k3 = delta_t.*Xdot(X + k2/2, u, L_B, N, Gs_B_t0, Gt_B_t0, Gg_B, gamma_t0);
-        k4 = delta_t.*Xdot(X + k3, u, L_B, N, Gs_B_t0, Gt_B_t0, Gg_B, gamma_t0);
+        k1 = delta_t.*Xdot(X, u, L_B, N, Gs_B_t0, Gt_B_t0, Gg_B, gamma_t0, inertia);
+        k2 = delta_t.*Xdot(X + k1/2, u, L_B, N, Gs_B_t0, Gt_B_t0, Gg_B, gamma_t0, inertia);
+        k3 = delta_t.*Xdot(X + k2/2, u, L_B, N, Gs_B_t0, Gt_B_t0, Gg_B, gamma_t0, inertia);
+        k4 = delta_t.*Xdot(X + k3, u, L_B, N, Gs_B_t0, Gt_B_t0, Gg_B, gamma_t0, inertia);
         X = X + 1/6*(k1 + 2*k2 + 2*k3 + k4);
         
         if norm(X(1:3))>1
@@ -101,7 +101,7 @@ function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTrack
         end
         
         % calculate angular momentumand rotational kinetic energy
-        [H_N, T] = getMomentumEnergy(X, N, Is_B, J_G, Iws, Gs_B_t0, Gt_B_t0, Gg_B, gamma_t0);
+        [H_N, T] = getMomentumEnergy(X, N, inertia.Is_B, inertia.J_G, inertia.Iws, Gs_B_t0, Gt_B_t0, Gg_B, gamma_t0);
         
         % get delta omega dot
         d_X = 1/6*(k1 + 2*k2 + 2*k3 + k4)/delta_t;

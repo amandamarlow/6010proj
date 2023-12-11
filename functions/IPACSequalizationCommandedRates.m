@@ -1,4 +1,4 @@
-function [d_OMEGA_desired, d_gamma_desired] = commandedRates(t, X, Lr_B, N, Iws, J_G, Gs_B, Gt_B, Gg_B, gains)
+function [d_OMEGA_desired, d_gamma_desired] = IPACSequalizationCommandedRates(t, X, Lr_B, N, Iws, J_G, Gs_B, Gt_B, Gg_B, gains)
     sigBN = X(1:3);
     omegaBN_B = X(4:6);
     gamma = X(7:6+N);
@@ -6,9 +6,9 @@ function [d_OMEGA_desired, d_gamma_desired] = commandedRates(t, X, Lr_B, N, Iws,
     OMEGA = X(7+2*N:6+3*N);
 
     % get reference state omega RN_B
-    [sigRN, omegaRN_R] = missionTracking(t);
-    dt_omegaRN = 0.0001;
-    [sigRN_t2, omegaRN_R_t2] = missionTracking(t + dt_omegaRN);
+    [sigRN, omegaRN_R, eclipse] = missionTracking(t);
+    dt_omegaRN = 0.001;
+    [sigRN_t2, omegaRN_R_t2, ~] = missionTracking(t + dt_omegaRN);
 
     BN = MRP2C(sigBN);
     RN = MRP2C(sigRN);
@@ -51,16 +51,36 @@ function [d_OMEGA_desired, d_gamma_desired] = commandedRates(t, X, Lr_B, N, Iws,
     % Get desired rates
 %     mu = 10^(-9);
 %     h = Js*14.4;
+%     h = Js*40;
 %     delta = det(1/(h^2)*(D1*D1'));
 %     Ws = zeros(1,N);
 %     for i = 1:N
 %         Ws(i) = 200*exp(-mu*delta);
 %     end
-    condition = cond(D)
-    Ws = gains.w1*exp(-w2*condition);
-    W = diag([Ws, ones(1,N)]);
-    Q = [D0, D];
-    d_eta = W*Q'*((Q*W*Q')\(-Lr_B));
-    d_OMEGA_desired = d_eta(1:N);
-    d_gamma_desired = d_eta(N+1:end);
+%     W = diag([Ws, ones(1,N)]);
+    Ws = gains.w1*exp(-gains.w2*cond(D));
+    W = diag([Ws*ones(1,N), ones(1,N)]);
+%     W = diag([ones(1,N), Ws*ones(1,N)]);
+
+    % Look at singular value decomposition
+
+    P_eclipse = -680; %[W] wuthdraw during eclipse
+    P_sun = 1000; %[W]
+    if eclipse == 1
+        P = P_eclipse;
+    else
+        P = P_sun;
+    end
+    
+    Q = [D, D0; zeros(1,N), OMEGA'*Iws];
+    Lrp = [-Lr_B; P];
+    
+    OMEGAavg = sum(OMEGA)/N;
+%     OMEGAavg = 40;
+    OMEGAe = OMEGA - OMEGAavg*ones(N,1);
+    R = [zeros(1,N), gains.k3*OMEGAe'];
+    u = W * ((Q'*(Q*W*Q')^-1)*(Lrp + Q*W*R') - R');
+    
+    d_OMEGA_desired = u(N+1:end);
+    d_gamma_desired = u(1:N);
 end

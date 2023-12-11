@@ -1,4 +1,4 @@
-function [H_N, T] = getMomentumEnergy(X, N, IRW_B, J_G, Iws, Gs_B_t0, Gt_B_t0, Gg_B_t0, gamma_t0)
+function [H_N, T] = getMomentumEnergy(X, N, Is_B, J_G, Iws, Gs_B_t0, Gt_B_t0, Gg_B_t0, gamma_t0)
 
     % calculate inertial angular momentum and kinetic energy from state
     sigBN = X(1:3);
@@ -12,7 +12,7 @@ function [H_N, T] = getMomentumEnergy(X, N, IRW_B, J_G, Iws, Gs_B_t0, Gt_B_t0, G
     Jg = J_G(3,3);
     IGs = Js - Iws;
 
-    HB_B = IRW_B*omegaBN_B;
+    HB_B = Is_B*omegaBN_B;
 
     HGW_B = 0;
     T_sum = 0;
@@ -35,6 +35,6 @@ function [H_N, T] = getMomentumEnergy(X, N, IRW_B, J_G, Iws, Gs_B_t0, Gt_B_t0, G
     NB = BN';
     H_N = NB*H_B;
 
-    T = 0.5*omegaBN_B'*IRW_B*omegaBN_B + 1/2*T_sum;
+    T = 0.5*omegaBN_B'*Is_B*omegaBN_B + 1/2*T_sum;
         
 end

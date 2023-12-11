@@ -1,8 +1,11 @@
-function [Xdot] = Xdot(X, u, L_B, N, Gs_B_t0, Gt_B_t0, Gg_B_t0, gamma_t0)
+function [Xdot] = Xdot(X, u, L_B, N, Gs_B_t0, Gt_B_t0, Gg_B_t0, gamma_t0, inertia)
     
-    Is_B = diag([86, 85, 113]); % kgm^2
-    J_G = diag([0.13, 0.04, 0.03]); % kgm^2 IG + Iw
-    Iws = 0.1; % kgm^2
+%     Is_B = diag([86, 85, 113]); % kgm^2
+%     J_G = diag([0.13, 0.04, 0.03]); % kgm^2 IG + Iw
+%     Iws = 0.1; % kgm^2
+    Is_B = inertia.Is_B; % kgm^2
+    J_G = inertia.J_G; % kgm^2 IG + Iw
+    Iws = inertia.Iws; % kgm^2
     
     sigBN = X(1:3);
     omegaBN_B = X(4:6);

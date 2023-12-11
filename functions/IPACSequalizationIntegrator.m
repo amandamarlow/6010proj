@@ -1,4 +1,4 @@
-function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTracking, torques] = integrator(X0, N, t0, tmax, Gs_B_t0, Gt_B_t0, Gg_B, inertia, gains)
+function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTracking, torques] = IPACSequalizationIntegrator(X0, N, t0, tmax, Gs_B_t0, Gt_B_t0, Gg_B, inertia, gains)
     % Constant inertias
 %     Is_B = diag([86, 85, 113]); % kgm^2
 %     J_G = diag([0.13, 0.04, 0.03]); % kgm^2 IG + Iw
@@ -13,7 +13,7 @@ function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTrack
 %     IGs = Js - Iws;
     
     % Set initial conditions and preallocate vectors
-    delta_t = 0.001; %[s]
+    delta_t = 0.01; %[s]
     
     time = t0:delta_t:tmax;
     Xvec = zeros(3*N+6,length(time));
@@ -66,7 +66,7 @@ function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTrack
 
         [Lr_B, sigRN, omegaRN_B, sigBR, omegaBR_B] = requiredTorque(time(n), X, N, I_B, Iws, Gs_B, Gt_B, Gg_B, gains);
 
-        [d_OMEGA_desired, d_gamma_desired] = commandedRates(time(n), X, Lr_B, N, Iws, J_G, Gs_B, Gt_B, Gg_B, gains);
+        [d_OMEGA_desired, d_gamma_desired] = IPACSequalizationCommandedRates(time(n), X, Lr_B, N, Iws, J_G, Gs_B, Gt_B, Gg_B, gains);
 
         % Calculate control torques
 %         K_gamma = 10;
@@ -90,10 +90,10 @@ function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTrack
         u = [ug; us];
         
         %RK4
-        k1 = delta_t.*Xdot(X, u, L_B, N, Gs_B_t0, Gt_B_t0, Gg_B, gamma_t0);
-        k2 = delta_t.*Xdot(X + k1/2, u, L_B, N, Gs_B_t0, Gt_B_t0, Gg_B, gamma_t0);
-        k3 = delta_t.*Xdot(X + k2/2, u, L_B, N, Gs_B_t0, Gt_B_t0, Gg_B, gamma_t0);
-        k4 = delta_t.*Xdot(X + k3, u, L_B, N, Gs_B_t0, Gt_B_t0, Gg_B, gamma_t0);
+        k1 = delta_t.*Xdot(X, u, L_B, N, Gs_B_t0, Gt_B_t0, Gg_B, gamma_t0, inertia);
+        k2 = delta_t.*Xdot(X + k1/2, u, L_B, N, Gs_B_t0, Gt_B_t0, Gg_B, gamma_t0, inertia);
+        k3 = delta_t.*Xdot(X + k2/2, u, L_B, N, Gs_B_t0, Gt_B_t0, Gg_B, gamma_t0, inertia);
+        k4 = delta_t.*Xdot(X + k3, u, L_B, N, Gs_B_t0, Gt_B_t0, Gg_B, gamma_t0, inertia);
         X = X + 1/6*(k1 + 2*k2 + 2*k3 + k4);
         
         if norm(X(1:3))>1
