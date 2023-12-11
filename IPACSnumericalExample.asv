@@ -21,7 +21,7 @@ gains.gamma = 2;
 gains.k2 = 2*10^-3;
 gains.k3 = 2*10^-3;
 gains.w1 = 1*10^-4; % weight matrix (commandedRates)
-gains.w2 = 1; % weight matrix (commandedRates)
+gains.w2 = 1;
 gains.K = 5; % on sigBR (requiredTorque)
 gains.P = 15; % on omegaBR (requiredTorque)
 
@@ -62,15 +62,13 @@ sigBN_t0 = [0; 0; 0];
 omegaBN_B_t0 = [0; 0; 0]; % [rad/s]
 gamma_t0 = [pi/2; -pi/2; -pi/2; pi/2]; % rad
 d_gamma_t0 = [0; 0; 0; 0];
-% OMEGA_t0 = [20000; 17500; 15000; 12500]/2/pi/60; % rad/s wheel speed
-OMEGA_t0 = [40; 40; 40; 40]; % rad/s wheel speed
+OMEGA_t0 = 14.4*ones(N,1); % rad/s wheel speed
 X0 = [sigBN_t0; omegaBN_B_t0; gamma_t0; d_gamma_t0; OMEGA_t0];
 
 
 % Call Integrator
 gamma_tf = [-45, 45, -45, 45]'*pi/180; % rad
-% tf = 100; % s
-tf = 49.8;
+tf = 100; % s
 [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTracking, torques] = integrator(X0, N, 0, tf, Gs_B_t0, Gt_B_t0, Gg_B_t0, inertia, gains);
 
 % % test orbit

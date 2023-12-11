@@ -1,7 +1,7 @@
-function [Lr_B, sigRN, omegaRN_B, sigBR, omegaBR_B] = requiredTorque(t, X, N, I_B, Iws, Gs_B, Gt_B, Gg_B)
+function [Lr_B, sigRN, omegaRN_B, sigBR, omegaBR_B] = requiredTorque(t, X, N, I_B, Iws, Gs_B, Gt_B, Gg_B, gains)
         
-    K = 5;
-    P = 15;
+%     K = 5;
+%     P = 15;
         
     sigBN = X(1:3);
     omegaBN_B = X(4:6);
@@ -27,7 +27,7 @@ function [Lr_B, sigRN, omegaRN_B, sigBR, omegaBR_B] = requiredTorque(t, X, N, I_
     omegaBR_B = omegaBN_B - omegaRN_B;
     dN_omegaRN_B = (omegaRN_B_t2 - omegaRN_B) / dt_omegaRN;
     
-    Lr_B = -K*sigBR - P*omegaBR_B + I_B*(dN_omegaRN_B - tilde(omegaBN_B)*omegaRN_B)...
+    Lr_B = -gains.K*sigBR - gains.P*omegaBR_B + I_B*(dN_omegaRN_B - tilde(omegaBN_B)*omegaRN_B)...
         + tilde(omegaBN_B)*I_B*omegaBN_B;
     for i = 1:N
         omegas = Gs_B(:,i)'*omegaBN_B;

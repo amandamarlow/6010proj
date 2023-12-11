@@ -49,17 +49,16 @@ function [d_OMEGA_desired, d_gamma_desired] = commandedRates(t, X, Lr_B, N, Iws,
     D = D1 - D2 + D3 + D4;
 
     % Get desired rates
-    mu = 10^(-9);
+%     mu = 10^(-9);
 %     h = Js*14.4;
-    h = Js*40;
-    delta = det(1/(h^2)*(D1*D1'));
-    Ws = zeros(1,N);
-    for i = 1:N
-        Ws(i) = 200*exp(-mu*delta);
-    end
+%     delta = det(1/(h^2)*(D1*D1'));
+%     Ws = zeros(1,N);
+%     for i = 1:N
+%         Ws(i) = 200*exp(-mu*delta);
+%     end
+    condition = cond(D)
+    Ws = gains.w1*exp(-w2*condition);
     W = diag([Ws, ones(1,N)]);
-%     Ws = gains.w1*exp(-gains.w2*cond(D));
-%     W = diag([Ws*ones(1,N), ones(1,N)]);
     Q = [D0, D];
     d_eta = W*Q'*((Q*W*Q')\(-Lr_B));
     d_OMEGA_desired = d_eta(1:N);

@@ -13,7 +13,7 @@ function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTrack
 %     IGs = Js - Iws;
     
     % Set initial conditions and preallocate vectors
-    delta_t = 0.01; %[s]
+    delta_t = 0.001; %[s]
     
     time = t0:delta_t:tmax;
     Xvec = zeros(3*N+6,length(time));

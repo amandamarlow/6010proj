@@ -48,7 +48,7 @@ ylabel("$\Omega$ [rad/s]", 'Interpreter', 'Latex')
 figure
 subplot(2,1,1)
 % semilogy(time, vecnorm(BRvec(1:3,:)))
-plot(time, BRvec(1:3,:))
+semilogy(time, vecnorm(BRvec(1:3,:)))
 sgtitle("Attitude Error")
 ylabel("$|\sigma_{B/R}|$", 'Interpreter', 'Latex')
 
