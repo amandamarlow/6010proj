@@ -1,4 +1,4 @@
-function [sigRN, omegaRN_R, eclipse] = missionTracking(t)
+function [sigRN, omegaRN_R, P] = missionTracking(t)
     
     % epoch0 = 05/23/1999 00:16:12.24
     rs_N = [1;0;0]; % Assume sun position is constant in inertial X direction    
@@ -35,6 +35,14 @@ function [sigRN, omegaRN_R, eclipse] = missionTracking(t)
     % booleon for if the spacecraft is in eclipse
     R_earth = 6378; % [km]
     eclipse = (dot(rc_N, rs_N) < 0) & (norm(cross(rc_N, rs_N/rs)) < R_earth);
+    
+    P_eclipse = -680; %[W] wuthdraw during eclipse
+    P_sun = 1000; %[W]
+    if eclipse == 1
+        P = P_eclipse;
+    else
+        P = P_sun;
+    end
     
 end
 

@@ -9,9 +9,9 @@ function [Lr_B, sigRN, omegaRN_B, sigBR, omegaBR_B] = requiredTorque(t, X, N, I_
     d_gamma = X(7+N:6+2*N);
     OMEGA = X(7+2*N:6+3*N);
 
-    [sigRN, omegaRN_R] = missionTracking(t);
+    [sigRN, omegaRN_R, ~] = missionTracking(t);
     dt_omegaRN = 0.0001;
-    [sigRN_t2, omegaRN_R_t2] = missionTracking(t + dt_omegaRN);
+    [sigRN_t2, omegaRN_R_t2, ~] = missionTracking(t + dt_omegaRN);
 
     BN = MRP2C(sigBN);
     RN = MRP2C(sigRN);

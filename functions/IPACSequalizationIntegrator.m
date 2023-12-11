@@ -1,4 +1,4 @@
-function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTracking, torques] = IPACSequalizationIntegrator(X0, N, t0, tmax, Gs_B_t0, Gt_B_t0, Gg_B, inertia, gains)
+function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTracking, torques, P_desired, P_actual] = IPACSequalizationIntegrator(X0, N, t0, tmax, Gs_B_t0, Gt_B_t0, Gg_B, inertia, gains)
     % Constant inertias
 %     Is_B = diag([86, 85, 113]); % kgm^2
 %     J_G = diag([0.13, 0.04, 0.03]); % kgm^2 IG + Iw
@@ -24,6 +24,8 @@ function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTrack
     Tvec = zeros(1,length(time));
     servoTracking = zeros(4*N,length(time));
     torques = zeros(2*N+3, length(time));
+    P_actual = zeros(1,length(time));
+    P_desired = zeros(1,length(time));
     
     gamma_t0 = X0(7:6+N);
     
@@ -66,7 +68,7 @@ function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTrack
 
         [Lr_B, sigRN, omegaRN_B, sigBR, omegaBR_B] = requiredTorque(time(n), X, N, I_B, Iws, Gs_B, Gt_B, Gg_B, gains);
 
-        [d_OMEGA_desired, d_gamma_desired] = IPACSequalizationCommandedRates(time(n), X, Lr_B, N, Iws, J_G, Gs_B, Gt_B, Gg_B, gains);
+        [d_OMEGA_desired, d_gamma_desired, P_desired(n)] = IPACSequalizationCommandedRates(time(n), X, Lr_B, N, Iws, J_G, Gs_B, Gt_B, Gg_B, gains);
 
         % Calculate control torques
 %         K_gamma = 10;
@@ -88,6 +90,8 @@ function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTrack
             us(i) = Iws*(d_OMEGA_desired(i) + d_gamma(i)*omegat);
         end
         u = [ug; us];
+        % determine power
+        P_actual(:,n) = sum(us.*OMEGA);
         
         %RK4
         k1 = delta_t.*Xdot(X, u, L_B, N, Gs_B_t0, Gt_B_t0, Gg_B, gamma_t0, inertia);
@@ -117,11 +121,12 @@ function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTrack
         commandedRates_vec(:,n+1) = [d_gamma_desired; d_OMEGA_desired];
         torques(:,n) = [us; ug; Lr_B];
 
+
     end
     
     sigBN = X(1:3);
 %     omegaBN_B = X(4:6);
-    [sigRN, omegaRN_R] = missionTracking(time(n+1));
+    [sigRN, omegaRN_R, ~] = missionTracking(time(n+1));
     BN = MRP2C(sigBN);
     RN = MRP2C(sigRN);
     BR = BN*RN';
