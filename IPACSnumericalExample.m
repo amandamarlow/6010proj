@@ -20,17 +20,40 @@ inertia.Is_B = diag([86, 85, 113]); % kgm^2
 inertia.Iws = 0.1; % kgm^2
 inertia.J_G = diag([0.13, 0.04, 0.03]); % kgm^2 IG + Iw
 
-% Gains
+% % Gains
+% Tis = 100*ones(3,1);
+% Iis = diag(inertia.Is_B);
+% Ps = 2*Iis./Tis;
+% P = diag(Ps);
+% 
+% damping = 0.7*ones(3,1);
+% gains.K = norm(Ps./damping.^2./Iis);
+
+nfmax = 0.025;
+% nfmax = 0.027;
+% nfmax = 0.03;
+% nfmax = 0.02;
+Iis = diag(inertia.Is_B);
+K = (nfmax*2*max(Iis))^2/max(Iis);
+
+damping = 0.65*ones(3,1);
+% damping = 0.75*ones(3,1);
+Ps = damping.*(K*Iis).^(1/2);
+P = diag(Ps);
+
 gains.gamma = 2;
 gains.k2 = 2*10^-3;
 gains.k3 = 2*10^-3;
 % gains.w1 = 1*10^-4; % weight matrix (commandedRates)
 gains.w1 = 100; % weight matrix (commandedRates)
 gains.w2 = 1; % weight matrix (commandedRates)
-gains.K = 5; % on sigBR (requiredTorque)
-gains.P = 15; % on omegaBR (requiredTorque)
-% gains.K = 50; % on sigBR (requiredTorque) % try not to hardcode use performance measures
-% gains.P = 20; % on omegaBR (requiredTorque)
+% gains.K = 1; % on sigBR (requiredTorque)
+% gains.P = 15*eye(3); % on omegaBR (requiredTorque)
+gains.K = K; % on sigBR (requiredTorque) % try not to hardcode use performance measures
+gains.P = P; % on omegaBR (requiredTorque)
+
+% gains.K = 5; % on sigBR (requiredTorque) % try not to hardcode use performance measures
+% gains.P = 15*eye(3); % on omegaBR (requiredTorque)
 
 % % Old
 % Is_B = diag([86, 85, 113]); % kgm^2
@@ -76,22 +99,22 @@ X0 = [sigBN_t0; omegaBN_B_t0; gamma_t0; d_gamma_t0; OMEGA_t0];
 
 % Call Integrator
 gamma_tf = [-45, 45, -45, 45]'*pi/180; % rad
-% tf = 1000; % s
-tf = 1000;
+tf = 1000; % s
+% tf = 200;
 % [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTracking, torques] = integrator(X0, N, 0, tf, Gs_B_t0, Gt_B_t0, Gg_B_t0, inertia, gains);
 [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTracking, torques, P_desired, P_actual] = IPACSequalizationIntegrator(X0, N, 0, tf, Gs_B_t0, Gt_B_t0, Gg_B_t0, inertia, gains);
 
 % % test orbit
 % t = linspace(0,2*pi/(14.577788549/24/60^2*2*pi));
 % rc_N = zeros(3,length(t));
-% eclipse = zeros(1,length(t));
+% P = zeros(1,length(t));
 % for i = 1:length(t)
 %     [rc_N(:,i), ~] = orbitPropogator(t(i));
-%     [~, ~, eclipse(i)] = missionTracking(t(i));
+%     [~, ~, P(i)] = missionTracking(t(i));
 % end
 % figure
-% plotOrbit(rc_N(:,eclipse==0), "testing orbit")
-% plotOrbit(rc_N(:,eclipse==1), "testing orbit")
+% plotOrbit(rc_N(:,P == -680), "testing orbit")
+% plotOrbit(rc_N(:,P == 1000), "testing orbit")
 
 % Plot
 plotAllVSCMG(time, N, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, torques, servoTracking)

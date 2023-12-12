@@ -29,7 +29,7 @@ function [sigRN, omegaRN_R, P] = missionTracking(t)
     omegaY = dot(d_lt_N, x_N)/lt;
     omegaZ = (dot(omegaX*ls_N,z_N) + dot(y_N, d_ls_N)) / dot(ls_N, x_N);
     
-    omegaRN_N = [omegaX; omegaY; omegaZ];
+    omegaRN_N = -[omegaX; omegaY; omegaZ];
     omegaRN_R = RN*omegaRN_N;
     
     % booleon for if the spacecraft is in eclipse
