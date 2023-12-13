@@ -1,4 +1,4 @@
-function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTracking, torques, P_desired, P_actual] = IPACSequalizationIntegrator(X0, N, t0, tmax, Gs_B_t0, Gt_B_t0, Gg_B, inertia, gains)
+function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTracking, torques, P_desired, P_actual, condition] = IPACSequalizationIntegrator(X0, N, t0, tmax, Gs_B_t0, Gt_B_t0, Gg_B, inertia, gains)
     % Constant inertias
 %     Is_B = diag([86, 85, 113]); % kgm^2
 %     J_G = diag([0.13, 0.04, 0.03]); % kgm^2 IG + Iw
@@ -26,6 +26,7 @@ function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTrack
     torques = zeros(2*N+3, length(time));
     P_actual = zeros(1,length(time));
     P_desired = zeros(1,length(time));
+    condition = zeros(1,length(time));
     
     gamma_t0 = X0(7:6+N);
     
@@ -68,7 +69,7 @@ function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTrack
 
         [Lr_B, sigRN, omegaRN_B, sigBR, omegaBR_B] = requiredTorque(time(n), X, N, I_B, Iws, Gs_B, Gt_B, Gg_B, gains);
 
-        [d_OMEGA_desired, d_gamma_desired, P_desired(n)] = IPACSequalizationCommandedRates(time(n), X, Lr_B, N, Iws, J_G, Gs_B, Gt_B, Gg_B, gains);
+        [d_OMEGA_desired, d_gamma_desired, P_desired(n), condition(n)] = IPACSequalizationCommandedRates(time(n), X, Lr_B, N, Iws, J_G, Gs_B, Gt_B, Gg_B, gains);
 
         % Calculate control torques
 %         K_gamma = 10;

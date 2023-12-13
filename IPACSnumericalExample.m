@@ -29,15 +29,17 @@ inertia.J_G = diag([0.13, 0.04, 0.03]); % kgm^2 IG + Iw
 % damping = 0.7*ones(3,1);
 % gains.K = norm(Ps./damping.^2./Iis);
 
-nfmax = 0.025;
+% nfmax = 0.025;
+% nfmax = 0.1213;
+nfmax = 0.15;
 % nfmax = 0.027;
 % nfmax = 0.03;
 % nfmax = 0.02;
 Iis = diag(inertia.Is_B);
-K = (nfmax*2*max(Iis))^2/max(Iis);
+K = (nfmax*2*min(Iis))^2/min(Iis);
 
-damping = 0.65*ones(3,1);
-% damping = 0.75*ones(3,1);
+% damping = 0.65*ones(3,1);
+damping = 0.7*ones(3,1);
 Ps = damping.*(K*Iis).^(1/2);
 P = diag(Ps);
 
@@ -98,11 +100,13 @@ X0 = [sigBN_t0; omegaBN_B_t0; gamma_t0; d_gamma_t0; OMEGA_t0];
 
 
 % Call Integrator
-gamma_tf = [-45, 45, -45, 45]'*pi/180; % rad
-tf = 1000; % s
-% tf = 200;
+% gamma_tf = [-45, 45, -45, 45]'*pi/180; % rad
+% tf = 1000; % s
+tf = 500;
+orbit_T = 2*pi/(14.577788549/24/60^2*2*pi);
+% tf = orbit_T;
 % [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTracking, torques] = integrator(X0, N, 0, tf, Gs_B_t0, Gt_B_t0, Gg_B_t0, inertia, gains);
-[time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTracking, torques, P_desired, P_actual] = IPACSequalizationIntegrator(X0, N, 0, tf, Gs_B_t0, Gt_B_t0, Gg_B_t0, inertia, gains);
+[time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTracking, torques, P_desired, P_actual, condition] = IPACSequalizationIntegrator(X0, N, 0, tf, Gs_B_t0, Gt_B_t0, Gg_B_t0, inertia, gains);
 
 % % test orbit
 % t = linspace(0,2*pi/(14.577788549/24/60^2*2*pi));
@@ -117,5 +121,11 @@ tf = 1000; % s
 % plotOrbit(rc_N(:,P == 1000), "testing orbit")
 
 % Plot
-plotAllVSCMG(time, N, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, torques, servoTracking)
-plotPower(time, P_desired, P_actual)
+plotAllVSCMG(time(2:end), N, Xvec(:,2:end), RNvec(:,2:end), BRvec(:,2:end), H_Nvec(:,2:end), Tvec(2:end), commandedRates_vec(:,2:end), torques(:,2:end), servoTracking(:,2:end))
+plotPower(time(2:end), P_desired(2:end), P_actual(2:end))
+
+figure
+plot(time, condition);
+xlabel("time [s]")
+ylabel("condition number")
+ylim([0 500])
