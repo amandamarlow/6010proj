@@ -12,13 +12,14 @@ N = 4; % number of VSCMGs
 theta = deg2rad(54.75); % angle eof pyramid sides to base
 
 % Inertias
-% inertia.Is_B = [15053, 3000, -1000; 3000, 6510, 2000; -1000, 2000, 11122];
-% inertia.Iws = 0.7;
-% inertia.J_G = diag([inertia.Iws+0.1, 0.4+0.1, 0.4+0.1]);
 
-inertia.Is_B = diag([86, 85, 113]); % kgm^2
-inertia.Iws = 0.1; % kgm^2
-inertia.J_G = diag([0.13, 0.04, 0.03]); % kgm^2 IG + Iw
+inertia.Is_B = [15053, 3000, -1000; 3000, 6510, 2000; -1000, 2000, 11122];
+inertia.Iws = 0.7;
+inertia.J_G = diag([inertia.Iws+0.1, 0.4+0.1, 0.4+0.1]);
+
+% inertia.Is_B = diag([86, 85, 113]); % kgm^2
+% inertia.Iws = 0.1; % kgm^2
+% inertia.J_G = diag([0.13, 0.04, 0.03]); % kgm^2 IG + Iw
 
 % % Gains
 % Tis = 100*ones(3,1);
@@ -43,15 +44,21 @@ damping = 0.7*ones(3,1);
 Ps = damping.*(K*Iis).^(1/2);
 P = diag(Ps);
 
+% paper gains -------------------------------------------------------------
 gains.gamma = 2;
-% gains.k2 = 2*10^-3;
-gains.k2 = 1;
+gains.k2 = 2*10^-3;
 gains.k3 = 2*10^-3;
-% gains.w1 = 1*10^-4; % weight matrix (commandedRates)
-gains.w1 = 100; % weight matrix (commandedRates)
+gains.w1 = 1*10^-4; % weight matrix (commandedRates)
 gains.w2 = 1; % weight matrix (commandedRates)
-% gains.K = 1; % on sigBR (requiredTorque)
-% gains.P = 15*eye(3); % on omegaBR (requiredTorque)
+% --------------------------------------------------------------------------
+
+% my gains------------------------------------------------------------------
+% gains.k2 = 1;
+% gains.k3 = 2*10^-3;
+% gains.gamma = 2;
+% gains.w1 = 100; % weight matrix (commandedRates)
+% gains.w2 = 1; % weight matrix (commandedRates)
+% --------------------------------------------------------------------------
 gains.K = K; % on sigBR (requiredTorque) % try not to hardcode use performance measures
 gains.P = P; % on omegaBR (requiredTorque)
 
@@ -84,20 +91,23 @@ gt4_B_t0 = cross(gg4_B_t0, gs4_B_t0);
 Gt_B_t0 = [gt1_B_t0, gt2_B_t0, gt3_B_t0, gt4_B_t0];
 
 % Initial State
-sigBN_t0 = [0.1; 0.2; 0.3];
-omegaBN_B_t0 = [0.01; -0.01; 0.005]; % [rad/s]
-gamma_t0 = [0; 0; 90; -90]*pi/180; % rad
-d_gamma_t0 = 0*ones(N,1);
-OMEGA_t0 = 14.4*ones(N,1); % rad/s wheel speed
-X0 = [sigBN_t0; omegaBN_B_t0; gamma_t0; d_gamma_t0; OMEGA_t0];
 
-% sigBN_t0 = [0; 0; 0];
-% omegaBN_B_t0 = [0; 0; 0]; % [rad/s]
-% gamma_t0 = [pi/2; -pi/2; -pi/2; pi/2]; % rad
-% d_gamma_t0 = [0; 0; 0; 0];
-% % OMEGA_t0 = [20000; 17500; 15000; 12500]/2/pi/60; % rad/s wheel speed
-% OMEGA_t0 = [40; 40; 40; 40]; % rad/s wheel speed
+% HW 2------------------------------------------------------------------
+% sigBN_t0 = [0.1; 0.2; 0.3];
+% omegaBN_B_t0 = [0.01; -0.01; 0.005]; % [rad/s]
+% gamma_t0 = [0; 0; 90; -90]*pi/180; % rad
+% d_gamma_t0 = 0*ones(N,1);
+% OMEGA_t0 = 14.4*ones(N,1); % rad/s wheel speed
 % X0 = [sigBN_t0; omegaBN_B_t0; gamma_t0; d_gamma_t0; OMEGA_t0];
+
+% paper ----------------------------------------------------------------
+sigBN_t0 = [0; 0; 0];
+omegaBN_B_t0 = [0; 0; 0]; % [rad/s]
+gamma_t0 = [pi/2; -pi/2; -pi/2; pi/2]; % rad
+d_gamma_t0 = [0; 0; 0; 0];
+% OMEGA_t0 = [20000; 17500; 15000; 12500]/2/pi/60; % rad/s wheel speed
+OMEGA_t0 = [40; 40; 40; 40]; % rad/s wheel speed
+X0 = [sigBN_t0; omegaBN_B_t0; gamma_t0; d_gamma_t0; OMEGA_t0];
 
 
 % Call Integrator
