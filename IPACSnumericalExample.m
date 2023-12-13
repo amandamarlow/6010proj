@@ -44,7 +44,8 @@ Ps = damping.*(K*Iis).^(1/2);
 P = diag(Ps);
 
 gains.gamma = 2;
-gains.k2 = 2*10^-3;
+% gains.k2 = 2*10^-3;
+gains.k2 = 1;
 gains.k3 = 2*10^-3;
 % gains.w1 = 1*10^-4; % weight matrix (commandedRates)
 gains.w1 = 100; % weight matrix (commandedRates)
