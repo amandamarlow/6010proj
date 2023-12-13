@@ -1,7 +1,8 @@
 function [sigRN, omegaRN_R, P] = missionTracking(t)
     
     % epoch0 = 05/23/1999 00:16:12.24
-    rs_N = [1;0;0]; % Assume sun position is constant in inertial X direction    
+%     rs_N = [1;0;0]; % Assume sun position is constant in inertial X direction    
+    rs_N = [72319853.600541; 122084713.706344; 52930648.183941];
     vs_N = [0;0;0];
     rs = norm(rs_N);
     

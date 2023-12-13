@@ -78,7 +78,8 @@ function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTrack
         
         d2_gamma_desired = (d_gamma_desired - commandedRates_vec(1:N,n))/delta_t;
         delta_d_gamma = d_gamma - d_gamma_desired;
-        d2_gamma = d2_gamma_desired - K_gamma*delta_d_gamma;
+%         d2_gamma = d2_gamma_desired - K_gamma*delta_d_gamma;
+        d2_gamma = gains.K_gamma*(d_gamma - d_gamma
         
         servoTracking(1:2*N,n) = [d_gamma; d_gamma_desired]; % save for servo tracking plots
         

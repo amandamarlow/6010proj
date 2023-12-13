@@ -22,24 +22,12 @@ inertia.J_G = diag([inertia.Iws+0.1, 0.4+0.1, 0.4+0.1]);
 % inertia.J_G = diag([0.13, 0.04, 0.03]); % kgm^2 IG + Iw
 
 % % Gains
-% Tis = 100*ones(3,1);
-% Iis = diag(inertia.Is_B);
-% Ps = 2*Iis./Tis;
-% P = diag(Ps);
-% 
-% damping = 0.7*ones(3,1);
-% gains.K = norm(Ps./damping.^2./Iis);
-
-% nfmax = 0.025;
-% nfmax = 0.1213;
-nfmax = 0.15;
-% nfmax = 0.027;
-% nfmax = 0.03;
-% nfmax = 0.02;
+nfmax = 0.12;
+% nfmax = 0.06;
 Iis = diag(inertia.Is_B);
 K = (nfmax*2*min(Iis))^2/min(Iis);
 
-% damping = 0.65*ones(3,1);
+% damping = 0.8*ones(3,1);
 damping = 0.7*ones(3,1);
 Ps = damping.*(K*Iis).^(1/2);
 P = diag(Ps);
@@ -105,31 +93,31 @@ sigBN_t0 = [0; 0; 0];
 omegaBN_B_t0 = [0; 0; 0]; % [rad/s]
 gamma_t0 = [pi/2; -pi/2; -pi/2; pi/2]; % rad
 d_gamma_t0 = [0; 0; 0; 0];
-% OMEGA_t0 = [20000; 17500; 15000; 12500]/2/pi/60; % rad/s wheel speed
-OMEGA_t0 = [40; 40; 40; 40]; % rad/s wheel speed
+OMEGA_t0 = [20000; 17500; 15000; 12500]*2*pi/60; % rad/s wheel speed
+% OMEGA_t0 = [40; 40; 40; 40]; % rad/s wheel speed
 X0 = [sigBN_t0; omegaBN_B_t0; gamma_t0; d_gamma_t0; OMEGA_t0];
 
 
 % Call Integrator
 % gamma_tf = [-45, 45, -45, 45]'*pi/180; % rad
 % tf = 1000; % s
-tf = 500;
+% tf = 500;
 orbit_T = 2*pi/(14.577788549/24/60^2*2*pi);
-% tf = orbit_T;
+tf = orbit_T*2;
 % [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTracking, torques] = integrator(X0, N, 0, tf, Gs_B_t0, Gt_B_t0, Gg_B_t0, inertia, gains);
 [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTracking, torques, P_desired, P_actual, condition] = IPACSequalizationIntegrator(X0, N, 0, tf, Gs_B_t0, Gt_B_t0, Gg_B_t0, inertia, gains);
 
-% % test orbit
-% t = linspace(0,2*pi/(14.577788549/24/60^2*2*pi));
-% rc_N = zeros(3,length(t));
-% P = zeros(1,length(t));
-% for i = 1:length(t)
-%     [rc_N(:,i), ~] = orbitPropogator(t(i));
-%     [~, ~, P(i)] = missionTracking(t(i));
-% end
-% figure
-% plotOrbit(rc_N(:,P == -680), "testing orbit")
-% plotOrbit(rc_N(:,P == 1000), "testing orbit")
+% test orbit
+t = linspace(0,2*pi/(14.577788549/24/60^2*2*pi));
+rc_N = zeros(3,length(t));
+P = zeros(1,length(t));
+for i = 1:length(t)
+    [rc_N(:,i), ~] = orbitPropogator(t(i));
+    [~, ~, P(i)] = missionTracking(t(i));
+end
+figure
+plotOrbit(rc_N(:,P == -680), "testing orbit")
+plotOrbit(rc_N(:,P == 1000), "testing orbit")
 
 % Plot
 plotAllVSCMG(time(2:end), N, Xvec(:,2:end), RNvec(:,2:end), BRvec(:,2:end), H_Nvec(:,2:end), Tvec(2:end), commandedRates_vec(:,2:end), torques(:,2:end), servoTracking(:,2:end))
@@ -139,4 +127,4 @@ figure
 plot(time, condition);
 xlabel("time [s]")
 ylabel("condition number")
-ylim([0 500])
+% ylim([0 500])
