@@ -81,13 +81,13 @@ subplot(3,1,1)
 plot(time, torques(1:N,:))
 sgtitle("Control Torques")
 ylabel("$u_s$ [Nm]", 'Interpreter', 'Latex')
-legend('$u_s1$', '$s_s2$', '$u_s3$', '$u_s4$', 'Location', 'best', 'Interpreter', 'Latex')
+legend('$u_s1$', '$u_s2$', '$u_s3$', '$u_s4$', 'Location', 'best', 'Interpreter', 'Latex')
 grid on
 
 subplot(3,1,2)
 plot(time, torques(N+1:2*N,:))
 ylabel("$u_g$ [Nm]", 'Interpreter', 'Latex')
-legend('$u_g1$', '$s_g2$', '$u_g3$', '$u_g4$', 'Location', 'best', 'Interpreter', 'Latex')
+legend('$u_g1$', '$u_g2$', '$u_g3$', '$u_g4$', 'Location', 'best', 'Interpreter', 'Latex')
 grid on
 
 subplot(3,1,3)

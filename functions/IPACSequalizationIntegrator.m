@@ -114,7 +114,7 @@ function [time, Xvec, RNvec, BRvec, H_Nvec, Tvec, commandedRates_vec, servoTrack
         d_OMEGA = d_X(end-(N-1):end);
         servoTracking(2*N+1:end,n) = [d_OMEGA; d_OMEGA_desired];
         
-        stored_power = stored_power + P_actual*delta_t;
+        stored_power = stored_power + P_actual(:,n)*delta_t;
         
         % store all info in output vectors
         Xvec(:,n+1) = X;

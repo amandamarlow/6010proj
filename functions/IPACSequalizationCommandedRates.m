@@ -7,7 +7,8 @@ function [d_OMEGA_desired, d_gamma_desired, P, condition] = IPACSequalizationCom
 
     % get reference state omega RN_B
     [sigRN, omegaRN_R, P] = missionTracking(t);
-    if stored_power >= 1500*60^2; % [Ws]
+    if (stored_power >= 1500*60^2) && (P > 0) % [Ws]
+%     if stored_power >= 1500*60 % [Ws]
        P = 0; 
     end
 %     dt_omegaRN = 0.001;
@@ -63,25 +64,11 @@ function [d_OMEGA_desired, d_gamma_desired, P, condition] = IPACSequalizationCom
 %     W = diag([Ws, ones(1,N)]);
     Ws = gains.w1*exp(-gains.w2*condition);
     W = diag([Ws*ones(1,N), ones(1,N)]);
-    
-    
-%     % wheel speed equalization with "gradient method" ---------------------
-%     Lrp = [-Lr_B; P];
-%     Q = [D, D0; zeros(1,N), OMEGA'*Iws];
-%     OMEGAavg = sum(OMEGA)/N;
-%     OMEGAe = OMEGA - OMEGAavg*ones(N,1);
-%     R = [zeros(1,N), gains.k3*OMEGAe'];
-%     u = W * ((Q'*(Q*W*Q')^-1)*(Lrp + Q*W*R') - R');
-%     % ---------------------------------------------------------------------
-    
-% wheel speed equalization with extra constraint --------------------------
-    OMEGAavg = sum(OMEGA)/N;
-    OMEGAe = OMEGA - OMEGAavg*ones(N,1);
-    Jw1 = OMEGAe'*OMEGAe/2;
-    delta_Jw1 = OMEGAe';
+  
+% IPACS no wheel equalization --------------------------
 
-    Lrp = [-Lr_B; P; -gains.k2*Jw1];
-    Q = [D, D0; zeros(1,N), OMEGA'*Iws; zeros(1,N), delta_Jw1];
+    Lrp = [-Lr_B; P];
+    Q = [D, D0; zeros(1,N), OMEGA'*Iws];
     
     if cond(Q) > 70 %rank(Q) < 5
         u = W^(1/2)*pinv(Q*W^(1/2), 1e-12)*Lrp;
@@ -91,6 +78,32 @@ function [d_OMEGA_desired, d_gamma_desired, P, condition] = IPACSequalizationCom
     
 % -------------------------------------------------------------------------
     
+%     % wheel speed equalization with "gradient method" ---------------------
+%     Lrp = [-Lr_B; P];
+%     Q = [D, D0; zeros(1,N), OMEGA'*Iws];
+%     OMEGAavg = sum(OMEGA)/N;
+%     OMEGAe = OMEGA - OMEGAavg*ones(N,1);
+%     R = [zeros(1,N), gains.k3*OMEGAe'];
+%     u = W * ((Q'*(Q*W*Q')^-1)*(Lrp + Q*W*R') - R');
+%     % ---------------------------------------------------------------------
+%     
+% % wheel speed equalization with extra constraint --------------------------
+%     OMEGAavg = sum(OMEGA)/N;
+%     OMEGAe = OMEGA - OMEGAavg*ones(N,1);
+%     Jw1 = OMEGAe'*OMEGAe/2;
+%     delta_Jw1 = OMEGAe';
+% 
+%     Lrp = [-Lr_B; P; -gains.k2*Jw1];
+%     Q = [D, D0; zeros(1,N), OMEGA'*Iws; zeros(1,N), delta_Jw1];
+%     
+%     if cond(Q) > 70 %rank(Q) < 5
+%         u = W^(1/2)*pinv(Q*W^(1/2), 1e-12)*Lrp;
+%     else
+%         u = W*Q'*((Q*W*Q')^-1)*(Lrp);
+%     end
+%     
+% % -------------------------------------------------------------------------
+%     
     d_OMEGA_desired = u(N+1:end);
     d_gamma_desired = u(1:N);
 end
